@@ -97,7 +97,13 @@ app.post('/api/past-life', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3333;
-app.listen(PORT, () => {
-  console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다`);
-});
+// Vercel serverless export
+module.exports = app;
+
+// Local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3333;
+  app.listen(PORT, () => {
+    console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다`);
+  });
+}
