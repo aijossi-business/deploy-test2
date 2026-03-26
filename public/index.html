@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>당신의 전생은?</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .stars {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--duration) infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title-section h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(to right, #f7971e, #ffd200, #f7971e);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      margin-bottom: 8px;
+    }
+
+    @keyframes shimmer {
+      to { background-position: 200% center; }
+    }
+
+    .title-section p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      font-weight: 300;
+    }
+
+    .input-section {
+      width: 100%;
+      text-align: center;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 16px 20px;
+      font-size: 1.1rem;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-family: 'Noto Sans KR', sans-serif;
+      outline: none;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .input-group input::placeholder { color: rgba(255,255,255,0.35); }
+    .input-group input:focus { border-color: #ffd200; background: rgba(255,255,255,0.12); }
+
+    .btn-divine {
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      color: #1a1a2e;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Noto Sans KR', sans-serif;
+      white-space: nowrap;
+    }
+
+    .btn-divine:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(247,151,30,0.4); }
+    .btn-divine:active { transform: translateY(0); }
+    .btn-divine:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading.active { display: block; }
+
+    .crystal-ball {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(100,80,200,0.5), rgba(30,20,80,0.8));
+      margin: 0 auto 24px;
+      animation: float 2s ease-in-out infinite, glow 1.5s ease-in-out infinite alternate;
+      box-shadow: 0 0 40px rgba(150,100,255,0.5);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 30px rgba(150,100,255,0.4); }
+      to { box-shadow: 0 0 60px rgba(150,100,255,0.8); }
+    }
+
+    .loading p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.7);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .result {
+      display: none;
+      width: 100%;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .result.active { display: block; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 32px 24px;
+      backdrop-filter: blur(20px);
+      margin-bottom: 20px;
+    }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .result-header .name-tag {
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 4px;
+    }
+
+    .result-header .past-life-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #ffd200;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .info-item.full { grid-column: 1 / -1; }
+
+    .info-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .category-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .category-human { background: rgba(100,200,255,0.2); color: #64c8ff; }
+    .category-animal { background: rgba(100,255,150,0.2); color: #64ff96; }
+    .category-microbe { background: rgba(255,100,255,0.2); color: #ff64ff; }
+    .category-object { background: rgba(255,200,100,0.2); color: #ffc864; }
+    .category-alien { background: rgba(200,100,255,0.2); color: #c864ff; }
+
+    .story-section {
+      line-height: 1.8;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      word-break: keep-all;
+      white-space: pre-wrap;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-share, .btn-retry {
+      flex: 1;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: all 0.3s;
+    }
+
+    .btn-retry {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .btn-retry:hover { background: rgba(255,255,255,0.2); }
+
+    .btn-share {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+
+    .btn-share:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      z-index: 1000;
+      transition: transform 0.4s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .title-section h1 { font-size: 1.8rem; }
+      .input-group { flex-direction: column; }
+      .result-card { padding: 24px 18px; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <div class="title-section">
+      <h1>당신의 전생은?</h1>
+      <p>이름을 입력하면 전생의 비밀이 밝혀집니다</p>
+    </div>
+
+    <div class="input-section" id="inputSection">
+      <div class="input-group">
+        <input type="text" id="nameInput" placeholder="이름을 입력하세요" maxlength="20" />
+        <button class="btn-divine" id="divineBtn" onclick="divine()">점술 시작</button>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="crystal-ball"></div>
+      <p>수정구슬로 전생을 들여다보는 중...</p>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-card">
+        <div class="result-header">
+          <div class="name-tag" id="resultName"></div>
+          <div class="past-life-title" id="resultOccupation"></div>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">시대</div>
+            <div class="info-value" id="resultYear"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">존재 유형</div>
+            <div class="info-value" id="resultCategory"></div>
+          </div>
+          <div class="info-item full">
+            <div class="info-label">사인</div>
+            <div class="info-value" id="resultDeath"></div>
+          </div>
+        </div>
+        <div class="story-section" id="resultStory"></div>
+      </div>
+      <div class="action-buttons">
+        <button class="btn-retry" onclick="retry()">다시 점치기</button>
+        <button class="btn-share" onclick="share()">결과 공유하기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Stars
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 3 + 1;
+      star.style.cssText = `
+        width: ${size}px; height: ${size}px;
+        left: ${Math.random() * 100}%; top: ${Math.random() * 100}%;
+        --duration: ${Math.random() * 3 + 2}s;
+        animation-delay: ${Math.random() * 3}s;
+      `;
+      starsEl.appendChild(star);
+    }
+
+    const categoryLabels = {
+      human: '인간',
+      animal: '동물',
+      microbe: '미생물',
+      object: '무생물',
+      alien: '외계/초월적 존재',
+    };
+
+    let lastResult = null;
+
+    document.getElementById('nameInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') divine();
+    });
+
+    async function divine() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) {
+        showToast('이름을 입력해주세요!');
+        return;
+      }
+
+      document.getElementById('inputSection').style.display = 'none';
+      document.getElementById('result').classList.remove('active');
+      document.getElementById('loading').classList.add('active');
+
+      try {
+        const res = await fetch('/api/past-life', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        });
+
+        if (!res.ok) throw new Error('서버 오류');
+
+        const data = await res.json();
+        lastResult = data;
+
+        document.getElementById('resultName').textContent = `${data.name}님의 전생`;
+        document.getElementById('resultOccupation').textContent = data.occupation;
+        document.getElementById('resultYear').textContent = data.yearFormatted;
+        document.getElementById('resultCategory').innerHTML =
+          `<span class="category-badge category-${data.category}">${categoryLabels[data.category]}</span>`;
+        document.getElementById('resultDeath').textContent = data.deathCause;
+        document.getElementById('resultStory').textContent = data.story;
+
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('result').classList.add('active');
+      } catch (err) {
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('inputSection').style.display = 'block';
+        showToast('오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
+
+    function retry() {
+      document.getElementById('result').classList.remove('active');
+      document.getElementById('inputSection').style.display = 'block';
+      document.getElementById('nameInput').focus();
+    }
+
+    async function share() {
+      if (!lastResult) return;
+
+      const text = `[당신의 전생은?]\n\n` +
+        `${lastResult.name}님의 전생\n` +
+        `시대: ${lastResult.yearFormatted}\n` +
+        `정체: ${lastResult.occupation}\n` +
+        `사인: ${lastResult.deathCause}\n\n` +
+        `${lastResult.story}\n\n` +
+        `나도 전생 알아보기 👉 ${window.location.href}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: '당신의 전생은?', text });
+          return;
+        } catch {}
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('결과가 클립보드에 복사되었습니다!');
+      } catch {
+        showToast('공유에 실패했습니다.');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+  </script>
+</body>
+</html>
